@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: elasticsearch
+spec:
+  replicas: {{ .Values.elasticsearch.replicas }}
+  selector:
+    matchLabels:
+      app: elasticsearch
+  template:
+    metadata:
+      labels:
+        app: elasticsearch
+    spec:
+      containers:
+      - name: elasticsearch
+        image: {{ .Values.elasticsearch.image }}
+        ports:
+        - containerPort: {{ .Values.elasticsearch.service.targetPort }}
+        resources:
+          requests:
+            memory: {{ .Values.elasticsearch.resources.requests.memory }}
+            cpu: {{ .Values.elasticsearch.resources.requests.cpu }}
+          limits:
+            memory: {{ .Values.elasticsearch.resources.limits.memory }}
+            cpu: {{ .Values.elasticsearch.resources.limits.cpu }}
+        env:
+          - name: discovery.type
+            value: "single-node"
+          - name: xpack.security.enabled
+            value: "false"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: elasticsearch
+spec:
+  selector:
+    app: elasticsearch
+  ports:
+    - port: {{ .Values.elasticsearch.service.port }}
+      targetPort: {{ .Values.elasticsearch.service.targetPort }}
+  type: ClusterIP
+

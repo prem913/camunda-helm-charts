@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: camunda-zeebe
+spec:
+  replicas: {{ .Values.camunda.replicas }}
+  selector:
+    matchLabels:
+      app: camunda-zeebe
+  template:
+    metadata:
+      labels:
+        app: camunda-zeebe
+    spec:
+      containers:
+      - name: camunda-zeebe
+        image: {{ .Values.camunda.image }}
+        ports:
+        - containerPort: {{ .Values.camunda.service.targetPort }}
+        resources:
+          requests:
+            memory: {{ .Values.camunda.resources.requests.memory }}
+            cpu: {{ .Values.camunda.resources.requests.cpu }}
+          limits:
+            memory: {{ .Values.camunda.resources.limits.memory }}
+            cpu: {{ .Values.camunda.resources.limits.cpu }}
+        env:
+          - name: OPTIMIZE_ELASTICSEARCH_HOST
+            value: "elasticsearch"
+          - name: OPTIMIZE_ELASTICSEARCH_HTTP_PORT
+            value: "9200"
+          - name: ZEEBE_BROKER_EXPORTERS_ELASTICSEARCH_CLASSNAME
+            value: "io.camunda.zeebe.exporter.ElasticsearchExporter"
+          - name: ZEEBE_BROKER_EXPORTERS_ELASTICSEARCH_ARGS_URL
+            value: "http://elasticsearch:9200"
+          - name: ZEEBE_BROKER_EXPORTERS_ELASTICSEARCH_ARGS_BULK_SIZE
+            value: "1"
+          - name: CAMUNDA_OPERATE_ELASTICSEARCH_URL
+            value: "http://elasticsearch:9200"
+          - name: CAMUNDA_OPERATE_ZEEBEELASTICSEARCH_URL
+            value: "http://elasticsearch:9200"
+          - name: CAMUNDA_TASKLIST_ELASTICSEARCH_URL
+            value: "http://elasticsearch:9200"
+          - name: CAMUNDA_TASKLIST_ZEEBEELASTICSEARCH_URL
+            value: "http://elasticsearch:9200"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: camunda-zeebe
+spec:
+  selector:
+    app: camunda-zeebe
+  ports:
+    - port: {{ .Values.camunda.service.port }}
+      targetPort: {{ .Values.camunda.service.targetPort }}
+  type: ClusterIP
+

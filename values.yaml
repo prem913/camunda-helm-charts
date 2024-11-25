@@ -1,0 +1,43 @@
+# Elasticsearch settings
+elasticsearch:
+  image: "docker.elastic.co/elasticsearch/elasticsearch:8.16.0"
+  replicas: 1
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "500m"
+    limits:
+      memory: "1Gi"
+      cpu: "1"
+
+  # Elasticsearch service (internal only, no external port)
+  service:
+    port: 9200
+    targetPort: 9200
+    type: ClusterIP  # Use ClusterIP to restrict access
+
+# Camunda settings
+camunda:
+  image: "prem9131/camunda-zeebe"
+  replicas: 1
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "500m"
+    limits:
+      memory: "1Gi"
+      cpu: "1"
+
+  # Camunda service (internal only, no external port)
+  service:
+    port: 8080
+    targetPort: 8080
+    type: ClusterIP  # Use ClusterIP to restrict access
+
+# Ingress settings
+ingress:
+  enabled: true
+  hostname: "camunda.local"
+  path: "/"
+  # Configure your ingress controller here if needed (nginx, Traefik, etc.)
+
